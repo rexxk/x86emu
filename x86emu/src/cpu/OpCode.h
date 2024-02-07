@@ -60,6 +60,7 @@ public:
 	bool UseSegmentRegister() const { return m_UseSegmentRegister; }
 
 	bool HasNoFlags() const { return m_NoFlags; }
+	bool HasSignExtend() const { return m_HasSignExtend; }
 
 	const std::string Name() const { return m_CodeName; }
 
@@ -71,6 +72,7 @@ private:
 	bool	m_HasImmediate = false;
 	bool	m_HasAltEncoding = false;
 	bool	m_HasW = false;
+	bool	m_HasSignExtend = false;
 
 	bool	m_WValue = false;
 

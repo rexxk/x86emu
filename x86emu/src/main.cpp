@@ -39,11 +39,16 @@ int main()
 //		0xb8, 0x00, 0x00, 0x8e, 0xc8, 0x8e, 0xd8, 0x8e, 0xc0, 0xb8, 0x00, 0x7c, 0x8e, 0xd0, 0xbc, 0xff, 0x00,
 //	};
 
+//	std::vector<uint8_t> execStream =
+//	{
+//		0x88, 0xd8, 0x89, 0xd8, 0x66, 0x89, 0xd8, 0x88, 0xcc, 0x90,
+//	};
+
 	std::vector<uint8_t> execStream =
 	{
-		0x88, 0xd8, 0x89, 0xd8, 0x66, 0x89, 0xd8, 0x88, 0xcc, 0x90,
+		0xb8, 0x0c, 0x00, 0x01, 0xc3, 0x26, 0x89, 0x1d, 0x3e, 0x83, 0x04, 0x09, 0x83, 0xc0, 0x07, 0xfa, 0x90,
+//		0xb8, 0x0c, 0x00, 0x01, 0xc3, 0x26, 0x89, 0x1d, 0x83, 0xc0, 0x07, 0xfa, 0x90,
 	};
-
 
 	for (auto it = execStream.begin(); it != execStream.end(); it++)
 	{
@@ -111,7 +116,7 @@ int main()
 
 				Register reg(registerSize, code & 0x7);
 
-				std::cout << opCode.Name() << " " << reg.ToString() << ", " << std::hex << value << std::dec << "\n";
+				std::cout << opCode.Name() << " " << reg.ToString() << ", " << std::hex << (uint16_t)value << std::dec << "\n";
 			}
 			else
 			{
@@ -121,7 +126,7 @@ int main()
 
 				Register reg(registerSize, code & 0x7);
 
-				std::cout << opCode.Name() << " " << reg.ToString() << ", " << std::hex << value << std::dec << "\n";
+				std::cout << opCode.Name() << " " << reg.ToString() << ", " << std::hex << (uint16_t)value << std::dec << "\n";
 			}
 		}
 
@@ -146,13 +151,26 @@ int main()
 
 			EffectiveAddress effectiveAddress(modRM.Mode(), modRM.GetRMIndex());
 
+			uint8_t immediateData = 0;
+
+			if (opCode.IsImmediate())
+			{
+				immediateData = *(++it);
+			}
+
 			switch (modRM.Mode())
 			{
 				case 0:
 				{
-
 					// [BX+SI]
-					std::cout << opCode.Name() << " [" << segment.ToString() << ":" << effectiveAddress.ToString() << "], " << sourceRegister.ToString() << "\n";
+					if (opCode.IsImmediate() && modRM.GetRegisterIndex() == 0)
+					{
+						std::cout << opCode.Name() << " [" << segment.ToString() << ":" << effectiveAddress.ToString() << "], " << (uint16_t)immediateData << "\n";
+					}
+					else
+					{
+						std::cout << opCode.Name() << " [" << segment.ToString() << ":" << effectiveAddress.ToString() << "], " << sourceRegister.ToString() << "\n";
+					}
 //					std::cout << "ModRM: [seg:reg], data = [" << segment.ToString() << ":" << effectiveAddress.ToString() << "], " << destinationRegister.ToString() << "\n";
 					break;
 				}
@@ -177,7 +195,15 @@ int main()
 
 				case 3:
 				{
-					std::cout << opCode.Name() << " " << destinationRegister.ToString() << ", " << sourceRegister.ToString() << "\n";
+					if (opCode.IsImmediate() && modRM.GetRegisterIndex() == 0)
+					{
+						std::cout << opCode.Name() << " " << destinationRegister.ToString() << ", " << (uint16_t)immediateData << "\n";
+					}
+					else
+					{
+						std::cout << opCode.Name() << " " << destinationRegister.ToString() << ", " << sourceRegister.ToString() << "\n";
+					}
+
 					break;
 				}
 			}
