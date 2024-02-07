@@ -13,7 +13,13 @@ static std::unordered_map<uint8_t, std::vector<OpCodeBitFlag>> s_OpCodeDefinitio
 	{ { 0b10110000 }, { { OpCodeBitFlag::w, OpCodeBitFlag::Immediate, OpCodeBitFlag::AltEncoding }}},
 	{ { 0b10100000 }, { { OpCodeBitFlag::w, OpCodeBitFlag::Displacement }}},
 	{ { 0b10010000 }, { { OpCodeBitFlag::NoFlags } } },
+
+	// MOV SEG
+	{ { 0b10001110 }, { { OpCodeBitFlag::ModRM, OpCodeBitFlag::sreg2 }}},
+	{ { 0b10001100 }, { { OpCodeBitFlag::ModRM, OpCodeBitFlag::sreg2 }}},
+
 };
+
 
 
 
@@ -24,6 +30,7 @@ OpCode::OpCode(uint8_t code)
 	std::cout << "OpCode: " << std::hex << (uint16_t)code << std::dec << "\n";
 
 	std::vector<OpCodeBitFlag> bitFlags;
+
 
 	for (auto& def : s_OpCodeDefinitions)
 	{
@@ -61,6 +68,7 @@ OpCode::OpCode(uint8_t code)
 			case OpCodeBitFlag::ModRM: m_HasModRM = true; break;
 			case OpCodeBitFlag::Immediate: m_HasImmediate = true; break;
 			case OpCodeBitFlag::AltEncoding: m_HasAltEncoding = true; break;
+			case OpCodeBitFlag::sreg2: m_UseSegmentRegister = true; break;
 		}
 	}
 

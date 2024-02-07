@@ -127,15 +127,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\cpu\EffectiveAddress.cpp" />
     <ClCompile Include="src\cpu\ModRM.cpp" />
     <ClCompile Include="src\cpu\OpCode.cpp" />
+    <ClCompile Include="src\cpu\Prefix.cpp" />
     <ClCompile Include="src\cpu\Register.cpp" />
+    <ClCompile Include="src\cpu\Segment.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\cpu\EffectiveAddress.h" />
     <ClInclude Include="src\cpu\modrm.h" />
     <ClInclude Include="src\cpu\OpCode.h" />
+    <ClInclude Include="src\cpu\Prefix.h" />
     <ClInclude Include="src\cpu\Register.h" />
+    <ClInclude Include="src\cpu\Segment.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

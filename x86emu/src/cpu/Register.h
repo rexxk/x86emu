@@ -3,70 +3,45 @@
 #include <cstdint>
 #include <string>
 
+#include <unordered_map>
+#include <vector>
 
-enum class Register8Bit
+enum class RegisterType
 {
-	AL = 0,
-	CL,
-	DL,
-	BL,
-	AH,
-	CH,
-	DH,
-	BH,
+	AL, BL, CL, DL, AH, BH, CH, DH,
+	AX, BX, CX, DX, SP, BP, SI, DI,
+	EAX, EBX, ECX, EDX, ESP, EBP, ESI, EDI,
+	CR0, CR2, CR3, CR4,
+	CS, DS, ES, FS, GS, SS,
 };
 
-enum class Register16Bit
+enum class RegisterSize
 {
-	AX = 0,
-	CX,
-	DX,
-	BX,
-	SP,
-	BP,
-	SI,
-	DI,
+	Bits8,
+	Bits16,
+	Bits32,
 };
 
-enum class Register32Bit
+enum class RegisterDomain
 {
-	EAX = 0,
-	ECX,
-	EDX,
-	EBX,
-	ESP,
-	EBP,
-	ESI,
-	EDI,
-};
-
-enum class SegmentRegister2
-{
-	ES = 0,
-	CS,
-	SS,
-	DS,
-};
-
-enum class SegmentRegister3
-{
-	ES = 0,
-	CS,
-	SS,
-	DS,
-	FS,
-	GS,
-};
-
-enum class SpecialPurposeRegister
-{
-	CR0 = 0,
-	CR2 = 2,
-	CR3,
-	CR4,
+	Register,
+	Control,
+	Segment,
 };
 
 
-std::string Register8BitToString(Register8Bit reg);
-std::string Register16BitToString(Register16Bit reg);
-std::string Register32BitToString(Register32Bit reg);
+class Register
+{
+public:
+	Register(RegisterSize size, uint8_t registerIndex, RegisterDomain domain = RegisterDomain::Register);
+
+	std::string ToString();
+
+	const RegisterType Type() const { return m_Type; }
+	const RegisterSize Size() const { return m_Size; }
+
+private:
+	RegisterSize m_Size = RegisterSize::Bits16;
+	RegisterType m_Type = RegisterType::AX;
+
+};

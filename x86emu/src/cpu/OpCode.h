@@ -54,6 +54,11 @@ public:
 	bool HasModRM() const { return m_HasModRM; }
 	bool WValue() const { return m_WValue; }
 
+	bool IsImmediate() const { return m_HasImmediate; }
+	bool HasAltEncoding() const { return m_HasAltEncoding; }
+
+	bool UseSegmentRegister() const { return m_UseSegmentRegister; }
+
 private:
 	bool	m_HasModRM = false;
 	bool	m_HasImmediate = false;
@@ -61,4 +66,7 @@ private:
 	bool	m_HasW = false;
 
 	bool	m_WValue = false;
+
+	bool	m_UseSegmentRegister = false;
+
 };

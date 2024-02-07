@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Register.h"
+
 #include <cstdint>
 
 
@@ -9,11 +11,12 @@ public:
 	ModRM(uint8_t byte);
 
 	const uint8_t Mode() const { return m_Mode; }
-	const uint8_t Register() const { return m_Register; }
-	const uint8_t AddressingMode() const { return m_AddressingMode; }
+	const uint8_t GetRegisterIndex() const { return m_RegisterIndex; }
+	const uint8_t GetRMIndex() const { return m_RMIndex; }
 
 private:
 	uint8_t m_Mode;
-	uint8_t m_Register;
-	uint8_t m_AddressingMode;
+
+	uint8_t m_RegisterIndex = 0;
+	uint8_t m_RMIndex = 0;
 };
