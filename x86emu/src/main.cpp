@@ -102,7 +102,7 @@ int main()
 
 				Register reg(RegisterSize::Bits16, code & 0x7, domain);
 
-				std::cout << "OP: " << reg.ToString() << ", " << std::hex << value << std::dec << "\n";
+				std::cout << opCode.Name() << " " << reg.ToString() << ", " << std::hex << value << std::dec << "\n";
 			}
 			else
 			{
@@ -112,7 +112,7 @@ int main()
 
 				Register reg(RegisterSize::Bits8, code & 0x7, domain);
 
-				std::cout << "OP: " << reg.ToString() << ", " << std::hex << value << std::dec << "\n";
+				std::cout << opCode.Name() << " " << reg.ToString() << ", " << std::hex << value << std::dec << "\n";
 			}
 		}
 
@@ -131,7 +131,8 @@ int main()
 				{
 
 					// [BX+SI]
-					std::cout << "ModRM: [seg:reg], data = [" << segment.ToString() << ":" << effectiveAddress.ToString() << "], " << destinationRegister.ToString() << "\n";
+					std::cout << opCode.Name() << " [" << segment.ToString() << ":" << effectiveAddress.ToString() << "], " << destinationRegister.ToString() << "\n";
+//					std::cout << "ModRM: [seg:reg], data = [" << segment.ToString() << ":" << effectiveAddress.ToString() << "], " << destinationRegister.ToString() << "\n";
 					break;
 				}
 				case 1:
@@ -139,7 +140,8 @@ int main()
 					// [BX+SI]+displacement8
 					uint8_t sib = *(++it);
 
-					std::cout << "ModRM: [seg:reg]+displacement8, data = [" << segment.ToString() << ":" << effectiveAddress.ToString() << "+" << (uint16_t)sib << "], " << destinationRegister.ToString() << "\n";
+					std::cout << opCode.Name() << " [" << segment.ToString() << ":" << effectiveAddress.ToString() << "+" << (uint16_t)sib << "], " << destinationRegister.ToString() << "\n";
+//					std::cout << "ModRM: [seg:reg]+displacement8, data = [" << segment.ToString() << ":" << effectiveAddress.ToString() << "+" << (uint16_t)sib << "], " << destinationRegister.ToString() << "\n";
 
 					break;
 				}
@@ -148,13 +150,13 @@ int main()
 					uint8_t sibLow = *(++it);
 					uint8_t sibHigh = *(++it);
 					// [BX+SI]+displacement16
-					std::cout << "ModRM: [seg:reg]+displacement16, data = [" << segment.ToString() << ":" << effectiveAddress.ToString() << "+" << (uint16_t)((sibHigh << 8) + sibLow) << "], " << destinationRegister.ToString() << "\n";
+					std::cout << opCode.Name() << " [" << segment.ToString() << ":" << effectiveAddress.ToString() << "+" << (uint16_t)((sibHigh << 8) + sibLow) << "], " << destinationRegister.ToString() << "\n";
 					break;
 				}
 
 				case 3:
 				{
-					std::cout << "ModRM: " << std::hex << (uint16_t)modRM.Mode() << " " << destinationRegister.ToString() << " " << sourceRegister.ToString() << "\n";
+					std::cout << opCode.Name() << " " << destinationRegister.ToString() << ", " << sourceRegister.ToString() << "\n";
 					break;
 				}
 			}

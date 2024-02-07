@@ -21,13 +21,28 @@ static std::unordered_map<uint8_t, std::vector<OpCodeBitFlag>> s_OpCodeDefinitio
 };
 
 
+static std::unordered_map<uint8_t, std::string> s_OpCodeNameMap =
+{
+	// MOV
+	{ 0b10001000, "MOV" },
+	{ 0b10001010, "MOV" },
+	{ 0b11000110, "MOV" },
+	{ 0b10110000, "MOV" },
+	{ 0b10100000, "MOV" },
+	{ 0b10010000, "MOV" },
+
+	// MOV SEG
+	{ 0b10001110, "MOV" },
+	{ 0b10001100, "MOV" },
+};
+
 
 
 
 OpCode::OpCode(uint8_t code)
 {
 
-	std::cout << "OpCode: " << std::hex << (uint16_t)code << std::dec << "\n";
+//	std::cout << "OpCode: " << std::hex << (uint16_t)code << std::dec << "\n";
 
 	std::vector<OpCodeBitFlag> bitFlags;
 
@@ -38,18 +53,24 @@ OpCode::OpCode(uint8_t code)
 		if ((code & 0xFE) == def.first)
 		{
 			bitFlags = def.second;
+			m_CodeName = s_OpCodeNameMap[code & 0xFE];
+
 			break;
 		}
 
 		if ((code & 0xFC) == def.first)
 		{
 			bitFlags = def.second;
+			m_CodeName = s_OpCodeNameMap[code & 0xFC];
+
 			break;
 		}
 
 		if ((code & 0xF0) == def.first)
 		{
 			bitFlags = def.second;
+			m_CodeName = s_OpCodeNameMap[code & 0xF0];
+
 			break;
 		}
 
@@ -58,6 +79,7 @@ OpCode::OpCode(uint8_t code)
 	if (bitFlags.size() == 0)
 	{
 		std::cout << "No opcode found for value: " << std::hex << (uint16_t)code << std::dec << "\n";
+		return;
 	}
 
 	for (auto& flag : bitFlags)

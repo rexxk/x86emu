@@ -59,7 +59,12 @@ public:
 
 	bool UseSegmentRegister() const { return m_UseSegmentRegister; }
 
+	const std::string Name() const { return m_CodeName; }
+
 private:
+
+	std::string m_CodeName = "";
+
 	bool	m_HasModRM = false;
 	bool	m_HasImmediate = false;
 	bool	m_HasAltEncoding = false;
