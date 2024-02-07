@@ -18,25 +18,30 @@ int main()
 {
 	std::cout << "x86 emulator\n";
 
-/*
+
+//	std::vector<uint8_t> execStream =
+//	{
+//		0x13, 0xCB,
+//		0x89, 0xCA,
+//		0xB9,
+//		0x90,
+//		0x3e, 0x66, 0x67, 0x89, 0x1e,
+//		0x26, 0x89, 0x05,
+//		0x3e, 0x89, 0x1c,
+//		0x3e, 0x89, 0x54, 0x0c,
+//		0x64, 0x89, 0x10,
+//		0x64, 0x66, 0x67, 0x89, 0x90, 0x00, 0x01,
+//		0x64, 0x89, 0x90, 0x00, 0x01,
+//	};
+
+//	std::vector<uint8_t> execStream =
+//	{
+//		0xb8, 0x00, 0x00, 0x8e, 0xc8, 0x8e, 0xd8, 0x8e, 0xc0, 0xb8, 0x00, 0x7c, 0x8e, 0xd0, 0xbc, 0xff, 0x00,
+//	};
+
 	std::vector<uint8_t> execStream =
 	{
-		0x13, 0xCB,
-		0x89, 0xCA,
-		0xB9,
-		0x90,
-		0x3e, 0x66, 0x67, 0x89, 0x1e,
-		0x26, 0x89, 0x05,
-		0x3e, 0x89, 0x1c,
-		0x3e, 0x89, 0x54, 0x0c,
-		0x64, 0x89, 0x10,
-		0x64, 0x66, 0x67, 0x89, 0x90, 0x00, 0x01,
-		0x64, 0x89, 0x90, 0x00, 0x01,
-	};
-*/
-	std::vector<uint8_t> execStream =
-	{
-		0xb8, 0x00, 0x00, 0x8e, 0xc8, 0x8e, 0xd8, 0x8e, 0xc0, 0xb8, 0x00, 0x7c, 0x8e, 0xd0, 0xbc, 0xff, 0x00,
+		0x88, 0xd8, 0x89, 0xd8, 0x66, 0x89, 0xd8, 0x88, 0xcc, 0x90,
 	};
 
 
@@ -80,10 +85,15 @@ int main()
 
 		OpCode opCode(code);
 
-		RegisterDomain domain = RegisterDomain::Register;
+		RegisterSize registerSize = RegisterSize::Bits8;
 
-		if (opCode.UseSegmentRegister())
-			domain = RegisterDomain::Segment;
+		if (opCode.WValue())
+			registerSize = RegisterSize::Bits16;
+
+		if (operandSizeOverride && registerSize == RegisterSize::Bits8)
+			registerSize = RegisterSize::Bits16;
+		else if (operandSizeOverride && registerSize == RegisterSize::Bits16)
+			registerSize = RegisterSize::Bits32;
 
 		if (opCode.IsImmediate() && opCode.HasAltEncoding())
 		{
@@ -99,8 +109,7 @@ int main()
 
 				value = (valueHigh << 8) + valueLow;
 
-
-				Register reg(RegisterSize::Bits16, code & 0x7, domain);
+				Register reg(registerSize, code & 0x7);
 
 				std::cout << opCode.Name() << " " << reg.ToString() << ", " << std::hex << value << std::dec << "\n";
 			}
@@ -110,7 +119,7 @@ int main()
 
 				value = valueLow;
 
-				Register reg(RegisterSize::Bits8, code & 0x7, domain);
+				Register reg(registerSize, code & 0x7);
 
 				std::cout << opCode.Name() << " " << reg.ToString() << ", " << std::hex << value << std::dec << "\n";
 			}
@@ -120,8 +129,20 @@ int main()
 		{
 			ModRM modRM(*(++it));
 
-			Register sourceRegister((operandSizeOverride ? RegisterSize::Bits32 : RegisterSize::Bits16), modRM.GetRMIndex());
-			Register destinationRegister((addressSizeOverride ? RegisterSize::Bits32 : RegisterSize::Bits16), modRM.GetRegisterIndex(), domain);
+			Register sourceRegister;
+			Register destinationRegister;
+
+			if (opCode.UseSegmentRegister())
+			{
+				registerSize = RegisterSize::Bits16;
+				sourceRegister = Register(registerSize, modRM.GetRMIndex());
+				destinationRegister = Register(registerSize, modRM.GetRegisterIndex(), RegisterDomain::Segment);
+			}
+			else
+			{
+				sourceRegister = Register(registerSize, modRM.GetRegisterIndex());
+				destinationRegister = Register(registerSize, modRM.GetRMIndex());
+			}
 
 			EffectiveAddress effectiveAddress(modRM.Mode(), modRM.GetRMIndex());
 
@@ -131,7 +152,7 @@ int main()
 				{
 
 					// [BX+SI]
-					std::cout << opCode.Name() << " [" << segment.ToString() << ":" << effectiveAddress.ToString() << "], " << destinationRegister.ToString() << "\n";
+					std::cout << opCode.Name() << " [" << segment.ToString() << ":" << effectiveAddress.ToString() << "], " << sourceRegister.ToString() << "\n";
 //					std::cout << "ModRM: [seg:reg], data = [" << segment.ToString() << ":" << effectiveAddress.ToString() << "], " << destinationRegister.ToString() << "\n";
 					break;
 				}
@@ -140,7 +161,7 @@ int main()
 					// [BX+SI]+displacement8
 					uint8_t sib = *(++it);
 
-					std::cout << opCode.Name() << " [" << segment.ToString() << ":" << effectiveAddress.ToString() << "+" << (uint16_t)sib << "], " << destinationRegister.ToString() << "\n";
+					std::cout << opCode.Name() << " [" << segment.ToString() << ":" << effectiveAddress.ToString() << "+" << (uint16_t)sib << "], " << sourceRegister.ToString() << "\n";
 //					std::cout << "ModRM: [seg:reg]+displacement8, data = [" << segment.ToString() << ":" << effectiveAddress.ToString() << "+" << (uint16_t)sib << "], " << destinationRegister.ToString() << "\n";
 
 					break;
@@ -150,7 +171,7 @@ int main()
 					uint8_t sibLow = *(++it);
 					uint8_t sibHigh = *(++it);
 					// [BX+SI]+displacement16
-					std::cout << opCode.Name() << " [" << segment.ToString() << ":" << effectiveAddress.ToString() << "+" << (uint16_t)((sibHigh << 8) + sibLow) << "], " << destinationRegister.ToString() << "\n";
+					std::cout << opCode.Name() << " [" << segment.ToString() << ":" << effectiveAddress.ToString() << "+" << (uint16_t)((sibHigh << 8) + sibLow) << "], " << sourceRegister.ToString() << "\n";
 					break;
 				}
 
@@ -160,6 +181,11 @@ int main()
 					break;
 				}
 			}
+		}
+
+		if (opCode.HasNoFlags())
+		{
+			std::cout << opCode.Name() << "\n";
 		}
 	}
 

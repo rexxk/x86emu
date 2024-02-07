@@ -59,6 +59,8 @@ public:
 
 	bool UseSegmentRegister() const { return m_UseSegmentRegister; }
 
+	bool HasNoFlags() const { return m_NoFlags; }
+
 	const std::string Name() const { return m_CodeName; }
 
 private:
@@ -74,4 +76,5 @@ private:
 
 	bool	m_UseSegmentRegister = false;
 
+	bool	m_NoFlags = false;
 };

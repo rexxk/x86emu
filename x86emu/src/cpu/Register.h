@@ -33,6 +33,7 @@ enum class RegisterDomain
 class Register
 {
 public:
+	Register() = default;
 	Register(RegisterSize size, uint8_t registerIndex, RegisterDomain domain = RegisterDomain::Register);
 
 	std::string ToString();
