@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\cpu\EffectiveAddress.cpp" />
+    <ClCompile Include="src\cpu\InstructionDecoder.cpp" />
     <ClCompile Include="src\cpu\ModRM.cpp" />
     <ClCompile Include="src\cpu\OpCode.cpp" />
     <ClCompile Include="src\cpu\Prefix.cpp" />
@@ -137,6 +138,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\cpu\EffectiveAddress.h" />
+    <ClInclude Include="src\cpu\InstructionDecoder.h" />
     <ClInclude Include="src\cpu\modrm.h" />
     <ClInclude Include="src\cpu\OpCode.h" />
     <ClInclude Include="src\cpu\Prefix.h" />

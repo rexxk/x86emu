@@ -3,16 +3,15 @@
 #include <iostream>
 #include <unordered_map>
 
-
 static std::unordered_map<uint8_t, std::vector<OpCodeBitFlag>> s_OpCodeDefinitions =
 {
+
+	{ { 0b10000000 }, { { OpCodeBitFlag::w, OpCodeBitFlag::ModRM, OpCodeBitFlag::ImmediateToRegOrMem, OpCodeBitFlag::Immediate, OpCodeBitFlag::s }}},
+
 	// ADD
 	{ { 0b00000000 }, { { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
 	{ { 0b00000010 }, { { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
-	{ { 0b10000000 }, { { OpCodeBitFlag::w, OpCodeBitFlag::ModRM, OpCodeBitFlag::Immediate, OpCodeBitFlag::s }}},
 	{ { 0b00000100 }, { { OpCodeBitFlag::w, OpCodeBitFlag::Immediate }}},
-
-
 	// CLC
 	{ { 0b11111000 }, { { OpCodeBitFlag::NoFlags }}},
 	// CLD
@@ -36,15 +35,19 @@ static std::unordered_map<uint8_t, std::vector<OpCodeBitFlag>> s_OpCodeDefinitio
 	{ { 0b11111101 }, { { OpCodeBitFlag::NoFlags }}},
 	// STI
 	{ { 0b11111011 }, { { OpCodeBitFlag::NoFlags }}},
+	// XOR
+	{ { 0b00110000 }, { { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
+	{ { 0b00110010 }, { { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
+	{ { 0b00110100 }, { { OpCodeBitFlag::w, OpCodeBitFlag::Immediate }}},
+
 };
 
 
-static std::unordered_map<uint8_t, std::string> s_OpCodeNameMap =
+static std::unordered_map<uint8_t, std::string> s_OpCodeNames =
 {
 	// ADD
 	{ 0b00000000, "ADD" },
 	{ 0b00000010, "ADD" },
-	{ 0b10000000, "ADD" },
 	{ 0b00000100, "ADD" },
 	// CLC
 	{ 0b11111000, "CLC" },
@@ -69,8 +72,31 @@ static std::unordered_map<uint8_t, std::string> s_OpCodeNameMap =
 	{ 0b11111101, "STD" },
 	// STI
 	{ 0b11111011, "STI" },
+	// XOR
+	{ 0b00110000, "XOR" },
+	{ 0b00110010, "XOR" },
+	{ 0b00110100, "XOR" },
 };
 
+static std::unordered_map<uint8_t, std::string> s_ImmediateOpCodeNames =
+{
+	// ADD
+	{ 0b000, "ADD" },
+	// OR
+	{ 0b001, "OR" },
+	// ADC
+	{ 0b010, "ADC" },
+	// SBB
+	{ 0b011, "SBB" },
+	// AND
+	{ 0b100, "AND" },
+	// SUB
+	{ 0b101, "SUB" },
+	// XOR
+	{ 0b110, "XOR" },
+	// CMP
+	{ 0b111, "CMP" },
+};
 
 
 
@@ -81,34 +107,45 @@ OpCode::OpCode(uint8_t code)
 
 	std::vector<OpCodeBitFlag> bitFlags;
 
-
 	for (auto& def : s_OpCodeDefinitions)
 	{
 		// Check for 7-bit and then 6-bit and lastly 4-bit hits
 		if ((code & 0xFE) == def.first)
 		{
 			bitFlags = def.second;
-			m_CodeName = s_OpCodeNameMap[code & 0xFE];
+			m_CodeName = s_OpCodeNames[code & 0xFE];
 
 			break;
 		}
+	}
 
-		if ((code & 0xFC) == def.first)
+	if (m_CodeName.empty())
+	{
+		for (auto& def : s_OpCodeDefinitions)
 		{
-			bitFlags = def.second;
-			m_CodeName = s_OpCodeNameMap[code & 0xFC];
+			if ((code & 0xFC) == def.first)
+			{
+				bitFlags = def.second;
+				m_CodeName = s_OpCodeNames[code & 0xFC];
 
-			break;
+				break;
+			}
 		}
+	}
 
-		if ((code & 0xF0) == def.first)
+	if (m_CodeName.empty())
+	{
+		for (auto& def : s_OpCodeDefinitions)
 		{
-			bitFlags = def.second;
-			m_CodeName = s_OpCodeNameMap[code & 0xF0];
 
-			break;
+			if ((code & 0xF0) == def.first)
+			{
+				bitFlags = def.second;
+				m_CodeName = s_OpCodeNames[code & 0xF0];
+
+				break;
+			}
 		}
-
 	}
 
 	if (bitFlags.size() == 0)
@@ -128,6 +165,7 @@ OpCode::OpCode(uint8_t code)
 			case OpCodeBitFlag::sreg2: m_UseSegmentRegister = true; break;
 			case OpCodeBitFlag::NoFlags: m_NoFlags = true; break;
 			case OpCodeBitFlag::s: m_HasSignExtend = true; break;
+			case OpCodeBitFlag::ImmediateToRegOrMem: m_IsImmediateToRegOrMem = true; break;
 		}
 	}
 
@@ -143,4 +181,14 @@ OpCode::OpCode(uint8_t code)
 		}
 	}
 
+	if (m_HasSignExtend)
+	{
+		m_SValue = code & 0x10;
+	}
+
+}
+
+void OpCode::SetName(uint8_t num)
+{
+	m_CodeName = s_ImmediateOpCodeNames[num];
 }

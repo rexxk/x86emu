@@ -36,6 +36,9 @@
     <ClCompile Include="src\cpu\EffectiveAddress.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\cpu\InstructionDecoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\cpu\modrm.h">
@@ -54,6 +57,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\cpu\EffectiveAddress.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cpu\InstructionDecoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
