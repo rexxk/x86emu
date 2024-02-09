@@ -47,6 +47,12 @@ int main()
 	for (auto it = execStream.begin(); it != execStream.end(); it++)
 	{
 		InstructionDecoder decoder(it);
+		InstructionDecoder::DecoderResult result = decoder.GetResult();
+
+		if (result.ValidCommand)
+		{
+			std::cout << " - " << result.CommandLine << "\n";
+		}
 	}
 
 }

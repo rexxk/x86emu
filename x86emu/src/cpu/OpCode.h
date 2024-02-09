@@ -53,6 +53,8 @@ class OpCode
 public:
 	OpCode(uint8_t code);
 
+	bool IsValid() const { return m_Valid; }
+
 	bool HasNoFlags() const { return m_NoFlags; }
 	bool HasModRM() const { return m_HasModRM; }
 	bool WValue() const { return m_WValue; }
@@ -71,6 +73,8 @@ public:
 private:
 
 	std::string m_CodeName = "";
+
+	bool	m_Valid = false;
 
 	bool	m_HasModRM = false;
 	bool	m_HasImmediate = false;

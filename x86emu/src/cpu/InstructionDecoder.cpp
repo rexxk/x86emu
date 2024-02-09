@@ -8,6 +8,7 @@
 #include "EffectiveAddress.h"
 
 #include <iostream>
+#include <sstream>
 
 
 InstructionDecoder::InstructionDecoder(std::vector<uint8_t>::iterator& byteIterator)
@@ -16,6 +17,16 @@ InstructionDecoder::InstructionDecoder(std::vector<uint8_t>::iterator& byteItera
 
 	OpCode opCode(*(byteIterator));
 
+	if (!opCode.IsValid())
+	{
+		m_DecoderResult.ValidCommand = false;
+		m_DecoderResult.CommandLine = "<not valid>";
+	}
+	else
+	{
+		m_DecoderResult.ValidCommand = true;
+	}
+
 	if (opCode.WValue())
 		m_RegisterSize = RegisterSize::Bits16;
 
@@ -23,6 +34,8 @@ InstructionDecoder::InstructionDecoder(std::vector<uint8_t>::iterator& byteItera
 		m_RegisterSize = RegisterSize::Bits16;
 	else if (m_OperandSizeOverride && m_RegisterSize == RegisterSize::Bits16)
 		m_RegisterSize = RegisterSize::Bits32;
+
+	std::stringstream ss;
 
 	if (opCode.IsImmediate() && opCode.HasAltEncoding())
 	{
@@ -40,7 +53,7 @@ InstructionDecoder::InstructionDecoder(std::vector<uint8_t>::iterator& byteItera
 
 			Register reg(m_RegisterSize, *(byteIterator) & 0x7);
 
-			std::cout << opCode.Name() << " " << reg.ToString() << ", " << std::hex << (uint16_t)value << std::dec << "\n";
+			ss << opCode.Name() << " " << reg.ToString() << ", " << std::hex << (uint16_t)value << std::dec;
 		}
 		else
 		{
@@ -50,7 +63,7 @@ InstructionDecoder::InstructionDecoder(std::vector<uint8_t>::iterator& byteItera
 
 			Register reg(m_RegisterSize, *(byteIterator) & 0x7);
 
-			std::cout << opCode.Name() << " " << reg.ToString() << ", " << std::hex << (uint16_t)value << std::dec << "\n";
+			ss << opCode.Name() << " " << reg.ToString() << ", " << std::hex << (uint16_t)value << std::dec;
 		}
 	}
 
@@ -93,44 +106,46 @@ InstructionDecoder::InstructionDecoder(std::vector<uint8_t>::iterator& byteItera
 		{
 			// [BX+SI]
 			if (opCode.IsImmediate() && modRM.GetRegisterIndex() == 0)
-				std::cout << opCode.Name() << " [" << m_Segment.ToString() << ":" << effectiveAddress.ToString() << "], " << (uint16_t)immediateData << "\n";
+				ss << opCode.Name() << " [" << m_Segment.ToString() << ":" << effectiveAddress.ToString() << "], " << (uint16_t)immediateData;
 			else
-				std::cout << opCode.Name() << " [" << m_Segment.ToString() << ":" << effectiveAddress.ToString() << "], " << sourceRegister.ToString() << "\n";
+				ss << opCode.Name() << " [" << m_Segment.ToString() << ":" << effectiveAddress.ToString() << "], " << sourceRegister.ToString();
 			break;
 		}
 		case 1:
 		{
 			// [BX+SI]+displacement8
 			uint8_t sib = *(++byteIterator);
-
-			std::cout << opCode.Name() << " [" << m_Segment.ToString() << ":" << effectiveAddress.ToString() << "+" << (uint16_t)sib << "], " << sourceRegister.ToString() << "\n";
+			ss << opCode.Name() << " [" << m_Segment.ToString() << ":" << effectiveAddress.ToString() << "+" << (uint16_t)sib << "], " << sourceRegister.ToString();
 			break;
 		}
 		case 2:
 		{
+			// [BX+SI]+displacement16
 			uint8_t sibLow = *(++byteIterator);
 			uint8_t sibHigh = *(++byteIterator);
-			// [BX+SI]+displacement16
-			std::cout << opCode.Name() << " [" << m_Segment.ToString() << ":" << effectiveAddress.ToString() << "+" << (uint16_t)((sibHigh << 8) + sibLow) << "], " << sourceRegister.ToString() << "\n";
+			ss << opCode.Name() << " [" << m_Segment.ToString() << ":" << effectiveAddress.ToString() << "+" << (uint16_t)((sibHigh << 8) + sibLow) << "], " << sourceRegister.ToString();
 			break;
 		}
 
 		case 3:
 		{
 			if (opCode.IsImmediate() && modRM.GetRegisterIndex() == 0)
-				std::cout << opCode.Name() << " " << destinationRegister.ToString() << ", " << (uint16_t)immediateData << "\n";
+				ss << opCode.Name() << " " << destinationRegister.ToString() << ", " << (uint16_t)immediateData;
 			else
-				std::cout << opCode.Name() << " " << destinationRegister.ToString() << ", " << sourceRegister.ToString() << "\n";
+				ss << opCode.Name() << " " << destinationRegister.ToString() << ", " << sourceRegister.ToString();
 
 			break;
 		}
 		}
+
 	}
 
 	if (opCode.HasNoFlags())
 	{
-		std::cout << opCode.Name() << "\n";
+		ss << opCode.Name();
 	}
+
+	m_DecoderResult.CommandLine = ss.str();
 }
 
 

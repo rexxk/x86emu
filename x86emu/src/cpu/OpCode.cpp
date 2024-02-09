@@ -154,6 +154,8 @@ OpCode::OpCode(uint8_t code)
 		return;
 	}
 
+	m_Valid = true;
+
 	for (auto& flag : bitFlags)
 	{
 		switch (flag)
