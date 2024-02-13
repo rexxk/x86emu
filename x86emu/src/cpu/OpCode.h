@@ -3,6 +3,16 @@
 #include "modrm.h"
 
 
+enum class OpCodeGeneration
+{
+	x86_8088,
+	x86_80186,
+	x86_80286,
+	x86_80386,
+	x86_80486,
+	x86_P5P6,
+};
+
 enum class OpCodeBitFlag
 {
 	NoFlags,
@@ -48,8 +58,17 @@ enum class ConditionTestField
 
 
 
+
 class OpCode
 {
+public:
+	struct OpCodeSpecification
+	{
+		std::string Name;
+		OpCodeGeneration Generation;
+		std::vector<OpCodeBitFlag> Bits;
+	};
+
 public:
 	OpCode(uint8_t code);
 

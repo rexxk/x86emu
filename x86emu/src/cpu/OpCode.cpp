@@ -3,79 +3,45 @@
 #include <iostream>
 #include <unordered_map>
 
-static std::unordered_map<uint8_t, std::vector<OpCodeBitFlag>> s_OpCodeDefinitions =
+
+
+static std::unordered_map<uint8_t, OpCode::OpCodeSpecification> s_OpCodeDefinitions =
 {
 
-	{ { 0b10000000 }, { { OpCodeBitFlag::w, OpCodeBitFlag::ModRM, OpCodeBitFlag::ImmediateToRegOrMem, OpCodeBitFlag::Immediate, OpCodeBitFlag::s }}},
+	{ { 0b10000000 }, { "imm", OpCodeGeneration::x86_8088, { OpCodeBitFlag::w, OpCodeBitFlag::ModRM, OpCodeBitFlag::ImmediateToRegOrMem, OpCodeBitFlag::Immediate, OpCodeBitFlag::s }}},
 
 	// ADD
-	{ { 0b00000000 }, { { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
-	{ { 0b00000010 }, { { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
-	{ { 0b00000100 }, { { OpCodeBitFlag::w, OpCodeBitFlag::Immediate }}},
+	{ { 0b00000000 }, { "ADD", OpCodeGeneration::x86_8088, { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
+	{ { 0b00000010 }, { "ADD", OpCodeGeneration::x86_8088, { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
+	{ { 0b00000100 }, { "ADD", OpCodeGeneration::x86_8088, { OpCodeBitFlag::w, OpCodeBitFlag::Immediate }}},
 	// CLC
-	{ { 0b11111000 }, { { OpCodeBitFlag::NoFlags }}},
+	{ { 0b11111000 }, { "CLC", OpCodeGeneration::x86_8088, { OpCodeBitFlag::NoFlags }}},
 	// CLD
-	{ { 0b11111100 }, { { OpCodeBitFlag::NoFlags }}},
+	{ { 0b11111100 }, { "CLD", OpCodeGeneration::x86_8088, { OpCodeBitFlag::NoFlags }}},
 	// CLI
-	{ { 0b11111010 }, { { OpCodeBitFlag::NoFlags }}},
+	{ { 0b11111010 }, { "CLI", OpCodeGeneration::x86_8088, { OpCodeBitFlag::NoFlags }}},
 	// MOV
-	{ { 0b10001000 }, { { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
-	{ { 0b10001010 }, { { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
-	{ { 0b11000110 }, { { OpCodeBitFlag::w, OpCodeBitFlag::Immediate }}},
-	{ { 0b10110000 }, { { OpCodeBitFlag::w, OpCodeBitFlag::Immediate, OpCodeBitFlag::AltEncoding }}},
-	{ { 0b10100000 }, { { OpCodeBitFlag::w, OpCodeBitFlag::Displacement }}},
+	{ { 0b10001000 }, { "MOV", OpCodeGeneration::x86_8088, { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
+	{ { 0b10001010 }, { "MOV", OpCodeGeneration::x86_8088, { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
+	{ { 0b11000110 }, { "MOV", OpCodeGeneration::x86_8088, { OpCodeBitFlag::w, OpCodeBitFlag::Immediate }}},
+	{ { 0b10110000 }, { "MOV", OpCodeGeneration::x86_8088, { OpCodeBitFlag::w, OpCodeBitFlag::Immediate, OpCodeBitFlag::AltEncoding }}},
+	{ { 0b10100000 }, { "MOV", OpCodeGeneration::x86_8088, { OpCodeBitFlag::w, OpCodeBitFlag::Displacement }}},
 	// MOV SEG
-	{ { 0b10001110 }, { { OpCodeBitFlag::ModRM, OpCodeBitFlag::sreg2 }}},
-	{ { 0b10001100 }, { { OpCodeBitFlag::ModRM, OpCodeBitFlag::sreg2 }}},
+	{ { 0b10001110 }, { "MOV", OpCodeGeneration::x86_8088, { OpCodeBitFlag::ModRM, OpCodeBitFlag::sreg2 }}},
+	{ { 0b10001100 }, { "MOV", OpCodeGeneration::x86_8088, { OpCodeBitFlag::ModRM, OpCodeBitFlag::sreg2 }}},
 	// NOP
-	{ { 0b10010000 }, { { OpCodeBitFlag::NoFlags }}},
+	{ { 0b10010000 }, { "NOP", OpCodeGeneration::x86_8088, { OpCodeBitFlag::NoFlags }}},
 	// STC
-	{ { 0b11111001 }, { { OpCodeBitFlag::NoFlags }}},
+	{ { 0b11111001 }, { "STC", OpCodeGeneration::x86_8088, { OpCodeBitFlag::NoFlags }}},
 	// STD
-	{ { 0b11111101 }, { { OpCodeBitFlag::NoFlags }}},
+	{ { 0b11111101 }, { "STD", OpCodeGeneration::x86_8088, { OpCodeBitFlag::NoFlags }}},
 	// STI
-	{ { 0b11111011 }, { { OpCodeBitFlag::NoFlags }}},
+	{ { 0b11111011 }, { "STI", OpCodeGeneration::x86_8088, { OpCodeBitFlag::NoFlags }}},
 	// XOR
-	{ { 0b00110000 }, { { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
-	{ { 0b00110010 }, { { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
-	{ { 0b00110100 }, { { OpCodeBitFlag::w, OpCodeBitFlag::Immediate }}},
+	{ { 0b00110000 }, { "XOR", OpCodeGeneration::x86_8088, { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
+	{ { 0b00110010 }, { "XOR", OpCodeGeneration::x86_8088, { OpCodeBitFlag::w, OpCodeBitFlag::ModRM }}},
+	{ { 0b00110100 }, { "XOR", OpCodeGeneration::x86_8088, { OpCodeBitFlag::w, OpCodeBitFlag::Immediate }}},
 
-};
-
-
-static std::unordered_map<uint8_t, std::string> s_OpCodeNames =
-{
-	// ADD
-	{ 0b00000000, "ADD" },
-	{ 0b00000010, "ADD" },
-	{ 0b00000100, "ADD" },
-	// CLC
-	{ 0b11111000, "CLC" },
-	// CLD
-	{ 0b11111100, "CLD" },
-	// CLI
-	{ 0b11111010, "CLI" },
-	// MOV
-	{ 0b10001000, "MOV" },
-	{ 0b10001010, "MOV" },
-	{ 0b11000110, "MOV" },
-	{ 0b10110000, "MOV" },
-	{ 0b10100000, "MOV" },
-	// MOV SEG
-	{ 0b10001110, "MOV" },
-	{ 0b10001100, "MOV" },
-	// NOP
-	{ 0b10010000, "NOP" },
-	// STC
-	{ 0b11111001, "STC" },
-	// STD
-	{ 0b11111101, "STD" },
-	// STI
-	{ 0b11111011, "STI" },
-	// XOR
-	{ 0b00110000, "XOR" },
-	{ 0b00110010, "XOR" },
-	{ 0b00110100, "XOR" },
 };
 
 static std::unordered_map<uint8_t, std::string> s_ImmediateOpCodeNames =
@@ -112,8 +78,8 @@ OpCode::OpCode(uint8_t code)
 		// Check for 7-bit and then 6-bit and lastly 4-bit hits
 		if ((code & 0xFE) == def.first)
 		{
-			bitFlags = def.second;
-			m_CodeName = s_OpCodeNames[code & 0xFE];
+			bitFlags = def.second.Bits;
+			m_CodeName = def.second.Name;
 
 			break;
 		}
@@ -125,8 +91,8 @@ OpCode::OpCode(uint8_t code)
 		{
 			if ((code & 0xFC) == def.first)
 			{
-				bitFlags = def.second;
-				m_CodeName = s_OpCodeNames[code & 0xFC];
+				bitFlags = def.second.Bits;
+				m_CodeName = def.second.Name;
 
 				break;
 			}
@@ -140,8 +106,8 @@ OpCode::OpCode(uint8_t code)
 
 			if ((code & 0xF0) == def.first)
 			{
-				bitFlags = def.second;
-				m_CodeName = s_OpCodeNames[code & 0xF0];
+				bitFlags = def.second.Bits;
+				m_CodeName = def.second.Name;
 
 				break;
 			}
