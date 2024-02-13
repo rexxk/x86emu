@@ -135,6 +135,7 @@
     <ClCompile Include="src\cpu\Register.cpp" />
     <ClCompile Include="src\cpu\Segment.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\mem\Memory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\cpu\EffectiveAddress.h" />
@@ -144,6 +145,7 @@
     <ClInclude Include="src\cpu\Prefix.h" />
     <ClInclude Include="src\cpu\Register.h" />
     <ClInclude Include="src\cpu\Segment.h" />
+    <ClInclude Include="src\mem\Memory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
